@@ -1,11 +1,11 @@
 {
-  "name": "node-typescript",
+  "name": "indi-invoice",
   "version": "1.0.0",
-  "description": "this is node api project with typescript",
+  "description": "api server for indi-invoice",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "NODE_ENV=staging && ts-node ./lib/server.ts",
+    "dev": "NODE_ENV=staging && ts-node ./server.ts",
     "start": " NODE_ENV=production && node ./build/server.js",
     "prod": "npm run build && npm run start"
   },
@@ -24,10 +24,9 @@
   },
   "homepage": "https://github.com/viru56/node-typescript#readme",
   "dependencies": {
-    "@types/express": "^4.16.1",
     "body-parser": "^1.18.3",
     "ejs": "^2.6.1",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.4.10",
     "nodemailer": "^5.1.1",
@@ -35,7 +34,9 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.0",
     "@types/jsonwebtoken": "^8.3.0",
+    "tslint": "^5.18.0",
     "typescript": "^3.3.3"
   }
 }

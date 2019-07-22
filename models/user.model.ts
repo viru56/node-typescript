@@ -22,7 +22,6 @@ const UserSchema = new Schema({
     },
     phone : {
         type: String,
-        required: [true, 'phone is required'],
         match: [/^[0-9]{10}$/, 'phone should have 10 digits only'],
         unique: true
     },
@@ -50,8 +49,8 @@ const UserSchema = new Schema({
     },
     role:{
         type: String,
-        enum: ['Admin','User'],
-        default: 'User'
+        enum: ['admin','employee','readOnly'],
+        default: 'admin'
     },
     createdAt: {
         type: Date,
