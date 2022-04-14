@@ -1,9 +1,10 @@
 import * as mongoose   from 'mongoose';
-import  {hashPassword} from '../services';
+import  { hashPassword } from '../services';
+import { IUser } from '../interfaces';
 
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
+const UserSchema = new Schema<IUser>({
     firstName : {
         type: String,
         required: [true, 'First name is required'],
@@ -44,14 +45,8 @@ const UserSchema = new Schema({
     },
     status:{
         type: String,
-        enum: ['Active','InActive'],
-        default: 'InActive'
-
-    },
-    role:{
-        type: String,
-        enum: ['Admin','User'],
-        default: 'User'
+        enum: ['active','inActive'],
+        default: 'active'
     },
     createdAt: {
         type: Date,
@@ -64,7 +59,7 @@ const UserSchema = new Schema({
 });
 
 UserSchema.pre('validate', function() {
-    this.password = hashPassword(this.password);
+    this.password = hashPassword(this.password)!;
   }
 );
 

@@ -1,15 +1,15 @@
 import * as crypto from 'crypto';
-import { config } from '../config/config';
+import config from '../config';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 
 const expiresIn:number = 60*60*1000*24;
 
-export const hashPassword = (password: string) => {
+export const hashPassword = (password: string): string => {
     if (password && password.match(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)) {
         return crypto.createHmac('sha256', config.secret).update(password).digest('hex');
     } else {
-        return false;
+        return '';
     }
 };
 

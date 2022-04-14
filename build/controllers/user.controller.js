@@ -1,156 +1,51 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserController = void 0;
 const models_1 = require("../models");
 const services_1 = require("../services");
 class UserController {
     addNewUser(req, res) {
-        const newUser = new models_1.User(req.body);
-        if (services_1.hashPassword(newUser.password)) {
-            newUser.save((err, user) => {
-                if (err) {
-                    res.status(400).json(err);
-                }
-                else {
-                    res.status(200).json(services_1.parseUser(user));
-                }
-            });
-        }
-        else {
-            res.status(400).json({ message: 'Password should have minimum eight characters, at least one letter and one number' });
-        }
-    }
-    ;
-    getUsers(req, res) {
-        models_1.User.find({}, { firstName: 1, lastName: 1, phone: 1, email: 1 }, (err, users) => {
-            if (err) {
-                res.status(400).json(err);
+        return __awaiter(this, void 0, void 0, function* () {
+            services_1.logger.info('/user', 'post', 'addNewUser', req.body.email);
+            services_1.logger.log('body', req.body);
+            const newUser = new models_1.User(req.body);
+            try {
+                const userData = yield newUser.save();
+                res.status(200).json({ user: userData });
             }
-            else {
-                res.status(200).json(users);
-            }
-        });
-    }
-    ;
-    getUserWithId(req, res) {
-        models_1.User.findById(req.params.id, { firstName: 1, lastName: 1, phone: 1, email: 1 }, (err, user) => {
-            if (err) {
-                res.status(400).json(err);
-            }
-            else {
-                res.status(200).json(user);
-            }
-        });
-    }
-    ;
-    updateUser(req, res) {
-        models_1.User.findById(req.params.id, (err, user) => {
-            if (err) {
-                res.status(400).json(err);
-            }
-            else {
-                if (req.body.firstName) {
-                    user.firstName = req.body.firstName;
-                }
-                if (req.body.lastName) {
-                    user.lastName = req.body.lastName;
-                }
-                if (req.body.phone) {
-                    user.phone = req.body.phone;
-                }
-                if (req.body.email) {
-                    user.lastName = req.body.email;
-                }
-                user.save((err, user) => {
-                    if (err) {
-                        res.status(400).json(err);
-                    }
-                    else {
-                        res.status(200).json(services_1.parseUser(user));
-                    }
-                });
-            }
-        });
-    }
-    ;
-    deleteUser(req, res) {
-        models_1.User.deleteOne({ _id: req.params.id }, (err, user) => {
-            if (err) {
-                res.status(400).json(err);
-            }
-            else {
-                res.status(200).json({ message: `user deleted - ${user.n}` });
+            catch (error) {
+                res.status(400).json(error);
+                services_1.logger.error('falied to create new user, reason:- ', error);
             }
         });
     }
     ;
     userLogin(req, res) {
-        if (req.body.email && req.body.password) {
-            models_1.User.findOne({ email: req.body.email, isDeleted: false }, (err, user) => {
-                if (!err && user) {
-                    // if(user.status !== "Active"){
-                    //     res.status(400).json({message:"your account is not active"});
-                    // }
-                    if (services_1.hashPassword(req.body.password) !== user.password) {
-                        res.status(400).json({ message: 'password did not match' });
-                    }
-                    else {
-                        const token = services_1.jwtAdminToken({
-                            id: user._id,
-                            email: user.email
-                        });
-                        res.status(200).json({ user: services_1.parseUser(user), token });
-                    }
-                }
-                else {
-                    res.status(400).json(err);
-                }
-            });
-        }
-        else {
-            res.status(400).json({ message: 'missing required fields' });
-        }
-    }
-    ;
-    userForgotPassword(req, res) {
-        models_1.User.findOne({ email: req.body.email, isDeleted: false }, (err, user) => {
-            if (err) {
-                res.json(400).json(err);
+        return __awaiter(this, void 0, void 0, function* () {
+            services_1.logger.info('/api/login', 'post', 'userLogin', req.body.email);
+            const user = yield models_1.User.findOne({ email: req.body.email });
+            if (!user) {
+                services_1.logger.error(`${req.body.email} - user not exist`);
+                return res.status(400).json({ 'message': 'user not exists' });
             }
-            else {
-                // send mail
-                res.status(200).json({ message: 'Reset password email is sent' });
+            if ((0, services_1.hashPassword)(req.body.password) !== user.password) {
+                services_1.logger.error(`password did not match for ${user.email}`);
+                return res.status(400).json({ message: 'password did not match' });
             }
-        });
-    }
-    ;
-    userResetPassword(req, res) {
-        models_1.User.findById(req.params.id, (err, user) => {
-            if (err) {
-                res.status(400).json(err);
-            }
-            else if (!user) {
-                res.status(400).json({ message: "user does not exists" });
-            }
-            else {
-                if (services_1.hashPassword(req.body.password) !== user.password) {
-                    res.status(400).json({ message: 'password did not match' });
-                }
-                else {
-                    user.password = req.body.newPassword;
-                    user.save((err, updatedUser) => {
-                        if (err) {
-                            res.status(400).json(err);
-                        }
-                        else {
-                            res.status(200).json({ "message": 'password updated' });
-                        }
-                    });
-                }
-            }
+            const token = (0, services_1.jwtToken)({ id: user._id, type: 'login', email: user.email });
+            res.status(200).json({ token, email: user.email, firstName: user.firstName, lastName: user.lastName });
         });
     }
     ;
 }
 exports.UserController = UserController;
 ;
-//# sourceMappingURL=user.controller.js.map

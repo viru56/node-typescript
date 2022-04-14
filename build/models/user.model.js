@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.User = void 0;
 const mongoose = require("mongoose");
 const services_1 = require("../services");
 const Schema = mongoose.Schema;
@@ -23,7 +24,7 @@ const UserSchema = new Schema({
     phone: {
         type: String,
         required: [true, 'phone is required'],
-        match: [/^[1-9]{10}$/, 'phone should have 10 digits only'],
+        match: [/^[0-9]{10}$/, 'phone should have 10 digits only'],
         unique: true
     },
     email: {
@@ -44,25 +45,24 @@ const UserSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['Active', 'InActive'],
-        default: 'InActive'
+        enum: ['active', 'inActive'],
+        default: 'active'
     },
     role: {
         type: String,
-        enum: ['Admin', 'User'],
-        default: 'User'
+        enum: ['admin', 'user'],
+        default: 'user'
     },
-    created_date: {
+    createdAt: {
         type: Date,
         default: Date.now
     },
-    updated_date: {
+    updatedAt: {
         type: Date,
         default: Date.now
     }
 });
 UserSchema.pre('validate', function () {
-    this.password = services_1.hashPassword(this.password);
+    this.password = (0, services_1.hashPassword)(this.password);
 });
 exports.User = mongoose.model('User', UserSchema);
-//# sourceMappingURL=user.model.js.map
